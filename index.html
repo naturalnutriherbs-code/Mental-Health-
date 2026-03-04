@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Nexus | Thrive 360°</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6', // Teal 500
+                            600: '#0d9488', // Teal 600
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        accent: {
+                            500: '#3b82f6', // Blue 500
+                            600: '#2563eb', // Blue 600
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-up {
+            animation: fadeUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+
+        /* Hide views by default for SPA routing */
+        .page-view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
+                    <span class="text-3xl">🌱</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl text-slate-900 leading-none tracking-tight">Health <span class="text-brand-600">Nexus</span></span>
+                        <span class="text-[10px] text-slate-500 font-medium tracking-wider uppercase mt-1">Project Thrive 360°</span>
+                    </div>
+                </div>
+                
+                <!-- Desktop Nav -->
+                <div class="hidden lg:flex space-x-6 items-center">
+                    <button onclick="navigateTo('home')" class="nav-link text-sm font-semibold text-brand-600 transition-colors">Home</button>
+                    <button onclick="navigateTo('about')" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">About Us</button>
+                    <button onclick="navigateTo('values')" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Core Values</button>
+                    <button onclick="navigateTo('collaborations')" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Collaborations</button>
+                    <button onclick="navigateTo('events')" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Events & Training</button>
+                </div>
+
+                <!-- Mobile Hamburger -->
+                <div class="lg:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-brand-600 focus:outline-none p-2">
+                        <span class="text-2xl font-bold">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full">
+            <div class="px-4 pt-2 pb-6 space-y-2 flex flex-col">
+                <button onclick="navigateTo('home')" class="mobile-nav-link text-left px-4 py-3 rounded-lg bg-brand-50 text-brand-600 font-semibold">Home (Thrive 360°)</button>
+                <button onclick="navigateTo('about')" class="mobile-nav-link text-left px-4 py-3 rounded-lg text-slate-600 font-medium hover:bg-slate-50">About Us</button>
+                <button onclick="navigateTo('values')" class="mobile-nav-link text-left px-4 py-3 rounded-lg text-slate-600 font-medium hover:bg-slate-50">Core Values</button>
+                <button onclick="navigateTo('collaborations')" class="mobile-nav-link text-left px-4 py-3 rounded-lg text-slate-600 font-medium hover:bg-slate-50">Collaborations</button>
+                <button onclick="navigateTo('events')" class="mobile-nav-link text-left px-4 py-3 rounded-lg text-slate-600 font-medium hover:bg-slate-50">Events & Training</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- PAGE 1: HOME VIEW (Thrive 360)             -->
+    <!-- ========================================== -->
+    <div id="view-home" class="page-view active pt-20">
+        <!-- Hero Section -->
+        <section class="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 bg-gradient-to-br from-brand-50 via-white to-blue-50">
+                <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-brand-100 opacity-50 blur-3xl"></div>
+                <div class="absolute top-1/2 -right-24 w-80 h-80 rounded-full bg-accent-100 opacity-40 blur-3xl"></div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 tracking-tight fade-up leading-tight">
+                    Youth Mental Wellness & <br class="hidden md:block" />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-accent-600">Awareness Program</span>
+                </h1>
+                
+                <p class="mt-4 text-xl md:text-2xl font-medium text-slate-600 max-w-4xl mx-auto mb-10 fade-up delay-100 leading-relaxed">
+                    A holistic approach to student mental wellbeing in the digital age.
+                </p>
+
+                <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-10 fade-up delay-200">
+                    In an era of constant comparison, pressure, and overstimulation, students are not failing — they are adapting. Thrive 360° is a structured awareness and engagement program designed to help youth understand their inner world, navigate external pressures, and build resilient, supportive connections.
+                </p>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-4 fade-up delay-300">
+                    <button onclick="document.getElementById('sessions').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 text-base font-semibold rounded-lg text-white bg-brand-600 hover:bg-brand-700 shadow-lg hover:shadow-brand-500/30 transition-all text-center">
+                        Explore the Program
+                    </button>
+                    <button onclick="document.getElementById('framework').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 text-base font-semibold rounded-lg text-brand-700 bg-white border border-brand-200 hover:bg-brand-50 shadow-sm transition-all text-center">
+                        Our Framework
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Need Section -->
+        <section id="need" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Youth Mental Wellness Matters Today</h2>
+                        <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Students today are navigating more than academics. Often, the loudest pressure does not come from society — <strong class="text-brand-700 font-semibold">it comes from within.</strong> Mental wellness begins with awareness. Before solutions, students need space to recognize what they are feeling — without judgment, stigma, or fear.
+                        </p>
+                        
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Primary Contributors to Student Mental Stress</h3>
+                            <div class="chart-container">
+                                <canvas id="stressChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="aspect-square rounded-2xl bg-gradient-to-tr from-slate-100 to-brand-50 p-8 flex flex-col justify-center items-center text-center border border-slate-200 shadow-inner">
+                            <span class="text-6xl mb-6">🧠</span>
+                            <h3 class="text-3xl font-bold text-slate-800 mb-4">The Internal Battle</h3>
+                            <p class="text-lg text-slate-600 italic">"The heaviest burdens are often the ones we place on ourselves."</p>
+                        </div>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-brand-200 rounded-full opacity-50 blur-xl"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Philosophy Section -->
+        <section id="philosophy" class="py-24 bg-brand-900 text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-brand-800 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-brand-700 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+            
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <span class="text-brand-300 font-semibold tracking-wider uppercase text-sm mb-4 block">Program Philosophy</span>
+                <h2 class="text-3xl md:text-5xl font-bold mb-8 leading-tight">What Is Thrive 360°?</h2>
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 p-8 md:p-10 rounded-2xl mb-10">
+                    <p class="text-xl md:text-3xl font-medium text-brand-50 italic">
+                        "Growth does not require self-destruction."
+                    </p>
+                </div>
+                <p class="text-lg md:text-xl text-brand-100 mb-8 leading-relaxed">
+                    The program addresses mental wellness through a 360-degree lens: <strong class="text-white">Inner dialogue, External pressures, and Human connection.</strong> Rather than lectures, Thrive 360° uses interactive, short-format, psychologically informed sessions that meet students where they are — emotionally and mentally.
+                </p>
+            </div>
+        </section>
+
+        <!-- Framework Section -->
+        <section id="framework" class="py-20 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">How the Program Works</h2>
+                    <p class="text-lg text-slate-600">Each session follows a structured, flexible, and scalable framework aligned with institutional policies.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 card-hover relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-brand-50 rounded-bl-full -z-0"></div>
+                        <div class="text-4xl mb-4 relative z-10">📋</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">Pre-Session Check-In</h3>
+                        <p class="text-slate-600 text-sm relative z-10">Brief verbal or reflective assessment to understand participant mindset.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 card-hover relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -z-0"></div>
+                        <div class="text-4xl mb-4 relative z-10">🎙️</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">Core Awareness</h3>
+                        <p class="text-slate-600 text-sm relative z-10">Guided discussion around real student experiences.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 card-hover relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -z-0"></div>
+                        <div class="text-4xl mb-4 relative z-10">🧩</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">Interactive Engagement</h3>
+                        <p class="text-slate-600 text-sm relative z-10">Safe, seminar-room-based activities encouraging reflection and dialogue.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 card-hover relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full -z-0"></div>
+                        <div class="text-4xl mb-4 relative z-10">📈</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">Feedback & Reflection</h3>
+                        <p class="text-slate-600 text-sm relative z-10">Capturing insights to continuously improve and measure impact.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Sessions Section -->
+        <section id="sessions" class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-brand-600 font-semibold tracking-wider uppercase text-sm mb-2 block">The Core Content</span>
+                    <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-6">The Three Sessions</h2>
+                    <p class="text-lg text-slate-600">A progressive journey from self-awareness to navigating the world, and finally, connecting with others.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-teal-100/60 rounded-3xl p-8 border border-teal-200 flex flex-col h-full card-hover shadow-md">
+                        <div class="w-16 h-16 rounded-2xl bg-white text-teal-600 flex items-center justify-center text-3xl mb-6 shadow-sm">🌱</div>
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-teal-700 uppercase tracking-wider">Session 1</span>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">YOU vs YOU</h3>
+                            <p class="text-teal-800 font-medium mt-1">Understanding the Inner Dialogue</p>
+                        </div>
+                        <p class="text-slate-700 italic mb-6">"Sometimes the biggest pressure doesn’t come from society — it comes from our own mind."</p>
+                        
+                        <div class="flex-grow space-y-4 mb-8">
+                            <div class="flex items-start gap-3">
+                                <span class="text-teal-600 mt-1 font-bold">✓</span>
+                                <span class="text-sm text-slate-800 font-medium">Self-criticism and comparison</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-teal-600 mt-1 font-bold">✓</span>
+                                <span class="text-sm text-slate-800 font-medium">Imposter syndrome</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-teal-600 mt-1 font-bold">✓</span>
+                                <span class="text-sm text-slate-800 font-medium">Overthinking and perfectionism</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-teal-600 mt-1 font-bold">✓</span>
+                                <span class="text-sm text-slate-800 font-medium">The belief of “I am not good enough”</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-xl shadow-sm mt-auto">
+                            <span class="block text-xs font-bold text-teal-600 uppercase mb-1">Key Message</span>
+                            <p class="text-slate-900 font-bold">You don’t need to defeat yourself to succeed.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-100/60 rounded-3xl p-8 border border-blue-200 flex flex-col h-full card-hover shadow-md">
+                        <div class="w-16 h-16 rounded-2xl bg-white text-blue-600 flex items-center justify-center text-3xl mb-6 shadow-sm">🌍</div>
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">Session 2</span>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">YOU vs THE WORLD</h3>
+                            <p class="text-blue-800 font-medium mt-1">Navigating External Pressure</p>
+                        </div>
+                        <p class="text-slate-700 italic mb-6">"Deadlines. Expectations. Grades. Family pressure. Career confusion. Social media standards."</p>
+                        
+                        <div class="flex-grow space-y-4 mb-8">
+                            <div class="flex items-start gap-3">
+                                <span class="text-blue-600 mt-1 font-bold">✓</span>
+                                <span class="text-sm text-slate-80
